@@ -1,26 +1,27 @@
-package main
+package service
 
 import (
 	"context"
 	"errors"
 	"testing"
+
+	"go-task-api/domain"
 )
 
-// Mock репозитория для тестов
 type MockTaskRepo struct {
-	tasks map[string]*Task
+	tasks map[string]*domain.Task
 }
 
 func NewMockTaskRepo() *MockTaskRepo {
-	return &MockTaskRepo{tasks: make(map[string]*Task)}
+	return &MockTaskRepo{tasks: make(map[string]*domain.Task)}
 }
 
-func (m *MockTaskRepo) Save(ctx context.Context, task *Task) error {
+func (m *MockTaskRepo) Save(ctx context.Context, task *domain.Task) error {
 	m.tasks[task.ID] = task
 	return nil
 }
 
-func (m *MockTaskRepo) GetByID(ctx context.Context, id string) (*Task, error) {
+func (m *MockTaskRepo) GetByID(ctx context.Context, id string) (*domain.Task, error) {
 	task, exists := m.tasks[id]
 	if !exists {
 		return nil, errors.New("task not found")
@@ -28,7 +29,6 @@ func (m *MockTaskRepo) GetByID(ctx context.Context, id string) (*Task, error) {
 	return task, nil
 }
 
-// Тесты для TaskService
 func TestTaskService_CreateTask_Success(t *testing.T) {
 	repo := NewMockTaskRepo()
 	service := NewTaskService(repo)
@@ -79,10 +79,8 @@ func TestTaskService_GetTask_Success(t *testing.T) {
 	repo := NewMockTaskRepo()
 	service := NewTaskService(repo)
 
-	// Сначала создаём задачу
 	createdTask, _ := service.CreateTask(context.Background(), "Get test")
 
-	// Получаем её
 	task, err := service.GetTask(context.Background(), createdTask.ID)
 
 	if err != nil {
